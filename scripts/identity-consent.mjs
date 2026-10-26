@@ -19,7 +19,7 @@ try {
   if(decision.status!=='APPROVED'||!decision.approved){await save('identity-credential',{version:1,provider:'didit',status:decision.status,authorityGranted:false});throw new Error('Identity is not approved; existing local authority blocked');}
   let person;try{person=await read('person');}catch(e){if(e.code!=='ENOENT')throw e;person={personId:randomUUID(),ownerRef:decision.ownerRef};await save('person',person);}
   if(person.ownerRef!==decision.ownerRef)throw new Error('Identity owner mismatch');
-  const now=Date.now();const credential=credentialFromDecision(decision,{...person,sessionId:decision.sessionId,workflowId:decision.workflowId,now,expiresAt:now+86400000});await archiveGrantRecord(grantRuntime,'credentials',credential);await save('identity-credential',credential);
+  const now=Date.now();const credential=credentialFromDecision(decision,{...person,sessionId:decision.sessionId,workflowId:decision.workflowId,now,expiresAt:now+86400000});await archiveGrantRecord(grantRuntime,'credentials',credential);await save('identity-credential',credential);await save('identity-display',{version:1,provider:'didit',credentialDigest:canonicalDigest(credential),checkedAt:now,...(decision.display||{})});
   console.log(JSON.stringify({status:'APPROVED',personReferenceSaved:true,credentialDigest:canonicalDigest(credential),expiresAt:credential.expiresAt,authorityGranted:false}));
  }else if(command==='propose'){
   const credential=await read('identity-credential');

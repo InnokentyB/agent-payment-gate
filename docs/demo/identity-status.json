@@ -1,0 +1,13 @@
+{
+  "provider": "Didit",
+  "status": "APPROVED",
+  "maskedName": "In*** B***",
+  "checks": {
+    "document": true,
+    "liveness": true,
+    "faceMatch": true
+  },
+  "checkedAt": 1793014366161,
+  "source": "Authenticated provider decision read; masked document-name projection",
+  "snapshot": true
+}

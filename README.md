@@ -15,7 +15,11 @@ The static demo has no keys or write API. It clearly labels recorded evidence. T
 
 ## Proven behavior
 
-A real sandboxed browser checks Didit, reviews and signs a permission, pays1+2+1XLM, repeats an invoice without another transfer, rejects more than2XLM/another merchant/a payment beyond the5XLM budget, and revokes. Network receipts, transfer terms, balances and removed rule were independently re-read. Negative requests are refused before broadcast. Fifty-eight Node checks and sixteen signed Soroban host scenarios pass. Browser wallet-extension signing and Reusable KYC are not claimed.
+A real sandboxed browser checks Didit, reviews and signs a permission, pays1+2+1XLM, repeats an invoice without another transfer, rejects more than2XLM/another merchant/a payment beyond the5XLM budget, and revokes. Network receipts, transfer terms, balances and removed rule were independently re-read. Negative requests are refused before broadcast. Sixty-one Node checks and sixteen signed Soroban host scenarios pass. Browser wallet-extension signing and Reusable KYC are not claimed.
+
+## Visible identity verification
+
+The owner dashboard displays a masked document name derived from the bound APPROVED Didit API response, the actual document/liveness/face-match flags and the time of the last status read. It links to the existing verification session and the owner-only Didit console. Full names, document numbers, media URLs and session tokens are not returned by the dashboard API. Display metadata is stored separately from the consent credential and cannot grant payment authority. The static judge page contains a dated masked snapshot; private provider sessions are not published.
 
 ## Architecture and specification
 

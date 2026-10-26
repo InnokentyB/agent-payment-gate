@@ -1,3 +1,4 @@
+import {identityDisplayFromDecision} from './identity-display.mjs';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const statuses=new Set(['NOT_STARTED','IN_PROGRESS','IN_REVIEW','APPROVED','DECLINED','EXPIRED','ABANDONED','RESUBMITTED']);
 export class DiditClient {
@@ -20,6 +21,6 @@ export class DiditClient {
   return result;
  }
  async create(ownerRef){if(typeof ownerRef!=='string'||!ownerRef)throw new Error('Missing owner binding');return this.validate(await this.request('/v3/session/',{workflow_id:this.workflow,vendor_data:ownerRef}),{ownerRef},true);}
- async decision({sessionId,ownerRef}){if(!uuid.test(sessionId))throw new Error('Invalid session ID');const data=this.validate(await this.request(`/v3/session/${sessionId}/decision/`),{ownerRef,sessionId});return {...data,approved:data.status==='APPROVED',authorityGranted:false};}
+ async decision({sessionId,ownerRef}){if(!uuid.test(sessionId))throw new Error('Invalid session ID');const raw=await this.request(`/v3/session/${sessionId}/decision/`);const data=this.validate(raw,{ownerRef,sessionId});const display=identityDisplayFromDecision(raw);return {...data,...(display?{display}:{}),approved:data.status==='APPROVED',authorityGranted:false};}
  async workflowSummary(){const w=await this.request(`/v3/workflows/${this.workflow}/`);return {workflowId:w.workflow_id,features:w.features,minPrice:w.min_price,maxPrice:w.max_price,active:w.is_archived===false};}
 }

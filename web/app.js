@@ -11,6 +11,7 @@ function render(s){
  state=s;const active=s.permission.status==='ACTIVE',installed=['ACTIVE','LOCAL_EXPIRED'].includes(s.permission.status),busy=s.busy||posting,identity=s.identity.status==='APPROVED'&&s.identity.current;
  badge('identity-badge',identity?'Verified':s.identity.status==='APPROVED'?'Check again':s.identity.status.replaceAll('_',' '),identity);
  badge('permission-badge',s.permission.status==='ACTIVE'?'Active':s.permission.status==='REVOKED'?'Revoked':s.permission.status==='LOCAL_EXPIRED'?'Expired locally':'Not granted',active);
+ $('verified-person').hidden=!identity||!s.identity.maskedName;if(identity&&s.identity.maskedName){$('verified-person-name').textContent=s.identity.maskedName;const c=s.identity.checks;$('verified-person-checks').textContent=c?.document&&c?.liveness&&c?.faceMatch?'Document, liveness & face match approved':'Verified document · authenticated Didit response';$('verified-person-time').textContent=s.identity.checkedAt?`Status checked ${new Date(s.identity.checkedAt).toLocaleString()}`:'';}
  $('identity-detail').textContent=identity?`Existing verification confirmed. Valid locally until ${new Date(s.identity.expiresAt).toLocaleString()}.`:'Open the existing Didit session, then check its status. A new verification is not created automatically.';
  $('verify-link').hidden=!s.identity.verificationUrl;if(s.identity.verificationUrl)$('verify-link').href=s.identity.verificationUrl;
  $('identity-check').disabled=busy||installed;
