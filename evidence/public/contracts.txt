@@ -1,0 +1,29 @@
+    Finished `test` profile [unoptimized] target(s) in 0.55s
+     Running unittests src/lib.rs (target/debug/deps/gate_harness-d58f7d46f3f0029a)
+
+running 16 tests
+test tests::agent_cannot_manage_permissions ... ok
+test tests::allowed_payment_moves_tokens ... ok
+test tests::budget_is_cumulative_and_failure_does_not_consume_it ... ok
+test tests::budget_releases_after_rolling_window ... ok
+test tests::different_token_is_rejected ... ok
+test tests::expired_permission_blocks_payment ... ok
+test tests::javascript_auth_payload_matches_pinned_oz_abi ... ok
+test tests::negative_is_rejected ... ok
+test tests::owner_can_revoke_agent ... ok
+test tests::per_payment_is_enforced ... ok
+test tests::recipient_is_enforced ... ok
+test tests::rule_selection_cannot_be_swapped_after_signing ... ok
+test tests::signature_binds_amount ... ok
+test tests::signed_entry_cannot_be_replayed ... ok
+test tests::unknown_key_cannot_pay ... ok
+test tests::zero_is_rejected ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.82s
+
+   Doc-tests gate_harness
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

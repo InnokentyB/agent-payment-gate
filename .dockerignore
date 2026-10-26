@@ -1,0 +1,8 @@
+.git
+node_modules
+contracts/target
+contracts/test_snapshots
+.runtime
+.env*
+*.secret
+evidence

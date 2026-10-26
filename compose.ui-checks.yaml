@@ -1,0 +1,25 @@
+name: hackmeridian-ui-checks
+services:
+  browser:
+    image: rolemorrow-browser-checks-browser:latest
+    platform: linux/amd64
+    init: true
+    user: "1000:1000"
+    network_mode: none
+    cpus: 2
+    mem_limit: 2g
+    pids_limit: 512
+    shm_size: 256m
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,size=512m", "/home/node:rw,nosuid,uid=1000,gid=1000,size=32m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true", "seccomp:./docker/browser-seccomp.json"]
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      - ./web:/app/web:ro
+      - ./evidence/ui-2026-10-25:/evidence
+    command: ["node", "scripts/ui-browser-check.mjs"]
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}

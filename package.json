@@ -1,0 +1,15 @@
+{
+  "name": "hackmeridian-agent-gate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "demo": "node src/demo.mjs",
+    "testnet:check": "node src/testnet-check.mjs"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "17.2.1"
+  },
+  "license": "MIT"
+}

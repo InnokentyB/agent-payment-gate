@@ -1,0 +1,11 @@
+import { Gate, prepareEnvelope, signRequest } from './gate.mjs';
+import { fixture } from './fixture.mjs';
+const f = fixture();
+const gate = new Gate(f.policy);
+const signature = signRequest(f.request, f.agent);
+const receipt = gate.evaluate(f.request, signature);
+console.log(JSON.stringify({ scenario: 'approved_invoice', request: f.request, receipt, envelopeXdr: prepareEnvelope(f.request, receipt, { sourcePublicKey: f.wallet.publicKey(), sequence: '0' }), envelopeSource: 'offline_unfunded_fixture' }));
+console.log(JSON.stringify({ scenario: 'duplicate_request', receipt: gate.evaluate(f.request, signature) }));
+const excessive = { ...f.request, id: 'invoice-002', amount: '50' };
+console.log(JSON.stringify({ scenario: 'above_limit', receipt: gate.evaluate(excessive, signRequest(excessive, f.agent)) }));
+console.log(JSON.stringify({ scenario: 'tampered_amount', receipt: gate.evaluate({ ...f.request, amount: '2' }, signature) }));

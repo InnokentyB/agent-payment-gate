@@ -1,0 +1,8 @@
+FROM hackmeridian-contracts-client:latest
+USER root
+RUN mkdir -p /ui-state && chown node:node /ui-state
+COPY --chown=node:node src /app/src
+COPY --chown=node:node scripts /app/scripts
+COPY --chown=node:node web /app/web
+USER node
+CMD ["node", "scripts/demo-web.mjs"]

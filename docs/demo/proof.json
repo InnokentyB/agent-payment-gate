@@ -1,0 +1,67 @@
+{
+  "accepted": true,
+  "network": "Stellar testnet",
+  "realBrowserRun": true,
+  "rule": 3,
+  "grantId": "adab2429-adbd-47c4-b81d-829086cd1c43",
+  "agentPermission": "REVOKED",
+  "receipts": [
+    {
+      "label": "demo-submission20261026-payment-001",
+      "hash": "f8ae8ff392129a8c04202e01bd927a418fe3e1f3855f1c259d92ddb79ff53ff2",
+      "ledger": 5396577,
+      "amount": "10000000",
+      "status": "SUCCESS"
+    },
+    {
+      "label": "demo-submission20261026-payment-002",
+      "hash": "98bbf1d684bd258b1ddb468177c07b54b3510b8afe0f28a18c06f377fe0de0b8",
+      "ledger": 5396584,
+      "amount": "20000000",
+      "status": "SUCCESS"
+    },
+    {
+      "label": "demo-submission20261026-payment-003",
+      "hash": "d5fd640e7385e704167ed5344023022d81ff3e2262b66a732d5f0a7bdd92ce84",
+      "ledger": 5396587,
+      "amount": "10000000",
+      "status": "SUCCESS"
+    },
+    {
+      "label": "install signed consent",
+      "hash": "cd3ecb8cbb83042a668a5a6b04ce69da3a9bc1779e5ae9be17ef56683315c62d",
+      "ledger": 5396575,
+      "status": "SUCCESS"
+    },
+    {
+      "label": "owner revoke",
+      "hash": "de4ee9940f4c7e2c520a5d0b2fa0d606df7a6214c7f9ad5f83edf8de7134603c",
+      "ledger": 5396592,
+      "status": "SUCCESS"
+    }
+  ],
+  "refusals": [
+    {
+      "invoiceId": "demo-submission20261026-denied-cap",
+      "state": "PREPARATION_FAILED",
+      "hash": null
+    },
+    {
+      "invoiceId": "demo-submission20261026-denied-recipient",
+      "state": "PREPARATION_FAILED",
+      "hash": null
+    },
+    {
+      "invoiceId": "demo-submission20261026-denied-budget",
+      "state": "PREPARATION_FAILED",
+      "hash": null
+    }
+  ],
+  "invoiceReuse": "one original journal row and hash",
+  "balances": {
+    "account": "80000000",
+    "merchant": "100120000000",
+    "stranger": "100000000000"
+  },
+  "removedRuleIndependentlyVerified": true
+}

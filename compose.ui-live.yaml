@@ -1,0 +1,29 @@
+name: hackmeridian-ui-live
+services:
+  browser:
+    image: rolemorrow-browser-checks-browser:latest
+    platform: linux/amd64
+    init: true
+    user: "1000:1000"
+    cpus: 2
+    mem_limit: 2g
+    pids_limit: 512
+    shm_size: 256m
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,size=512m", "/home/node:rw,nosuid,uid=1000,gid=1000,size=32m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true", "seccomp:./docker/browser-seccomp.json"]
+    environment:
+      ALLOW_UI_TESTNET: "yes"
+    volumes:
+      - ./scripts:/app/scripts:ro
+      - ./evidence/ui-testnet-2026-10-26:/evidence
+    networks: [demo]
+    command: ["node", "scripts/ui-live-testnet.mjs"]
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
+networks:
+  demo:
+    external: true
+    name: hackmeridian-contracts_default

@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+members = ["account", "recipient-policy", "spending-policy", "verifier", "harness"]
+[workspace.dependencies]
+soroban-sdk = { version = "=25.3.0" }
+stellar-accounts = "=0.7.1"
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+strip = "symbols"
+panic = "abort"
+codegen-units = 1
+lto = true
+[profile.dev]
+debug = 0
+[profile.test]
+debug = 0

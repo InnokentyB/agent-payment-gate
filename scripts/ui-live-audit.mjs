@@ -1,0 +1,22 @@
+// Independent read-only audit after the real browser acceptance.
+import assert from 'node:assert/strict';import {readFile}from'node:fs/promises';
+import{rpc,Networks,TransactionBuilder,Keypair,Contract,Address,Asset,scValToNative,xdr}from'@stellar/stellar-sdk';
+import{PaymentJournal}from'../src/payment-operations.mjs';import{validatePreparedPayment,transactionLookupEvidence}from'../src/payment-cli.mjs';
+const read=async p=>JSON.parse(await readFile(p,'utf8'));
+const acceptance=await read('/evidence/result.json');assert.equal(acceptance.accepted,true);
+const state=await read('/runtime/deployment.json'),intent=await read('/runtime/delegation-intent.json'),revoke=await read('/runtime/last-receipt.json');
+assert.equal(state.agentRule,undefined);assert.equal(state.revokedRule,acceptance.rule);assert.equal(state.grantId,acceptance.grantId);assert.equal(revoke.label,'owner revoke');assert.equal(revoke.status,'SUCCESS');
+const server=new rpc.Server('https://soroban-testnet.stellar.org');assert.equal((await server.getNetwork()).passphrase,Networks.TESTNET);
+const j=new PaymentJournal({journalDir:'/operations',controlDir:'/runtime'});let rows;try{rows=j.sql.prepare('SELECT * FROM operations WHERE invoice_id LIKE ? ORDER BY created_at').all(`demo-${acceptance.runId}-%`)}finally{j.close()}
+const success=rows.filter(r=>r.state==='CONFIRMED');assert.equal(success.length,3);assert.equal(success.reduce((sum,r)=>sum+BigInt(JSON.parse(r.terms).amount),0n),40000000n);
+const refused=rows.filter(r=>r.state==='PREPARATION_FAILED');assert.equal(refused.length,3);assert(refused.every(r=>!r.hash));assert.equal(rows.length,6);
+const receipts=[];
+for(const row of success){const terms=JSON.parse(row.terms);assert.equal(terms.grantId,state.grantId);const result=await server.getTransaction(row.hash);assert.equal(result.status,'SUCCESS');assert.equal(result.ledger,row.ledger);assert(validatePreparedPayment({network:'testnet',hash:row.hash,envelope:row.envelope},terms));assert.equal(transactionLookupEvidence(result,{hash:row.hash,envelope:row.envelope}).verifiedEnvelope,true);receipts.push({label:row.invoice_id,hash:row.hash,ledger:result.ledger,amount:terms.amount,status:result.status})}
+for(const [label,hash]of[['install signed consent',intent.hash],['owner revoke',revoke.hash]]){const r=await server.getTransaction(hash);assert.equal(r.status,'SUCCESS');const tx=TransactionBuilder.fromXDR(r.envelopeXdr,Networks.TESTNET);assert.equal(Buffer.from(tx.hash()).toString('hex'),hash);const fn=tx.operations[0]?.func;assert.equal(Address.fromScAddress(fn.invokeContract.contractAddress).toString(),state.account);assert.equal(fn.invokeContract.functionName.toString(),label==='owner revoke'?'remove_context_rule':'add_context_rule');receipts.push({label,hash,ledger:r.ledger,status:r.status})}
+const keys=await read('/runtime/keys.json'),fee=Keypair.fromSecret(keys.fee).publicKey(),merchant=Keypair.fromSecret(keys.merchant).publicKey(),stranger=Keypair.fromSecret(keys.stranger).publicKey();
+const token=Asset.native().contractId(Networks.TESTNET);
+const build=async op=>new TransactionBuilder(await server.getAccount(fee),{fee:'100000',networkPassphrase:Networks.TESTNET}).addOperation(op).setTimeout(60).build();
+const balances={};for(const [n,address]of[['account',state.account],['merchant',merchant],['stranger',stranger]]){const sim=await server.simulateTransaction(await build(new Contract(token).call('balance',new Address(address).toScVal())));assert(!rpc.Api.isSimulationError(sim));balances[n]=scValToNative(sim.result.retval).toString()}
+assert.deepEqual(balances,acceptance.final);assert.equal(BigInt(acceptance.baseline.account)-BigInt(balances.account),40000000n);assert.equal(BigInt(balances.merchant)-BigInt(acceptance.baseline.merchant),40000000n);assert.equal(balances.stranger,acceptance.baseline.stranger);
+const ruleCheck=await server.simulateTransaction(await build(new Contract(state.account).call('get_context_rule',xdr.ScVal.scvU32(state.revokedRule))));assert(rpc.Api.isSimulationError(ruleCheck));assert(String(ruleCheck.error).includes('Error(Contract, #3000)'));
+console.log(JSON.stringify({accepted:true,network:'Stellar testnet',realBrowserRun:true,rule:state.revokedRule,grantId:state.grantId,agentPermission:'REVOKED',receipts,refusals:refused.map(r=>({invoiceId:r.invoice_id,state:r.state,hash:r.hash})),invoiceReuse:'one original journal row and hash',balances,removedRuleIndependentlyVerified:true},null,2));

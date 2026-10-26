@@ -1,0 +1,87 @@
+name: hackmeridian-contracts
+x-job: &job
+  platform: linux/amd64
+  init: true
+  user: "1000:1000"
+  cpus: 2
+  mem_limit: 6g
+  pids_limit: 256
+  tmpfs: ["/tmp:rw,nosuid,size=512m"]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options: {max-size: "5m", max-file: "2"}
+  volumes:
+    - ./contracts:/workspace/contracts
+    - cargo-cache:/home/builder/.cargo
+  build:
+    context: .
+    dockerfile: docker/Dockerfile.contracts
+x-client: &client
+  platform: linux/amd64
+  image: hackmeridian-contracts-client:latest
+  build: {context: ., dockerfile: docker/Dockerfile.client}
+  init: true
+  user: "1000:1000"
+  cpus: 1
+  mem_limit: 512m
+  pids_limit: 128
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,size=64m"]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  volumes:
+    - ./src:/app/src:ro
+    - ./test:/app/test:ro
+    - ./scripts:/app/scripts:ro
+    - ./contracts/target/wasm32v1-none/release:/artifacts:ro
+    - demo-state:/runtime
+  logging:
+    driver: json-file
+    options: {max-size: "5m", max-file: "2"}
+services:
+  fetch:
+    <<: *job
+    command: ["cargo", "fetch", "--locked"]
+  contracts:
+    <<: *job
+    network_mode: none
+    environment:
+      CARGO_NET_OFFLINE: "true"
+  client:
+    <<: *client
+    network_mode: none
+  journal-admin:
+    <<: *client
+    profiles: [setup]
+    network_mode: none
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      - demo-state:/runtime
+      - operation-state:/operations
+  testnet:
+    <<: *client
+    profiles: [live]
+    volumes:
+      - ./src:/app/src:ro
+      - ./test:/app/test:ro
+      - ./scripts:/app/scripts:ro
+      - ./contracts/target/wasm32v1-none/release:/artifacts:ro
+      - demo-state:/runtime
+      - operation-state:/operations
+      - grant-state:/grants:ro
+    networks: [default]
+    environment:
+      ALLOW_TESTNET: "${ALLOW_TESTNET:-}"
+volumes:
+  cargo-cache:
+  demo-state:
+  operation-state:
+  grant-state:
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.231.123.0/28

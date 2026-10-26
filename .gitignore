@@ -1,0 +1,8 @@
+node_modules/
+.env*
+*.secret
+work/
+contracts/target/
+contracts/test_snapshots/
+.runtime/
+contracts/**/test_snapshots/

@@ -1,0 +1,6 @@
+FROM rolemorrow-browser-checks-browser:latest
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+RUN npx --no-install playwright install ffmpeg
+USER node

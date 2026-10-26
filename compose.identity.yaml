@@ -1,0 +1,38 @@
+x-identity-job: &identity-job
+  image: hackmeridian-contracts-client:latest
+  platform: linux/amd64
+  init: true
+  user: "1000:1000"
+  cpus: 1
+  mem_limit: 256m
+  pids_limit: 64
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,size=16m"]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options: {max-size: "1m", max-file: "2"}
+services:
+  identity-refresh:
+    <<: *identity-job
+    networks: [default]
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      - /home/innokenty/.config/hackmeridian/didit.env:/run/secrets/didit.env:ro
+      - didit-state:/identity:ro
+      - grant-state:/runtime
+    command: ["node", "scripts/identity-consent.mjs", "refresh"]
+  consent:
+    <<: *identity-job
+    network_mode: none
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      - demo-state:/wallet:ro
+      - grant-state:/runtime
+    command: ["node", "scripts/identity-consent.mjs", "status"]
+volumes:
+  didit-state:
+  grant-state:

@@ -1,0 +1,42 @@
+services:
+  web:
+    image: hackmeridian-demo-web:latest
+    build: {context: ., dockerfile: docker/Dockerfile.web}
+    platform: linux/amd64
+    init: true
+    restart: unless-stopped
+    user: "1000:1000"
+    cpus: 1
+    mem_limit: 512m
+    pids_limit: 128
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: ["/tmp:rw,nosuid,size=32m"]
+    environment:
+      ALLOW_TESTNET: "yes"
+      PORT: "3157"
+    ports: ["127.0.0.1:3157:3157"]
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      - ./web:/app/web:ro
+      - /home/innokenty/.config/hackmeridian/didit.env:/run/secrets/didit.env:ro
+      - didit-state:/identity:ro
+      - demo-state:/runtime
+      - grant-state:/grants
+      - operation-state:/operations
+      - web-state:/ui-state
+    networks: [default]
+    command: ["node", "scripts/demo-web.mjs"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3157/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
+volumes:
+  didit-state:
+  web-state:

@@ -1,0 +1,25 @@
+services:
+  didit:
+    image: hackmeridian-contracts-client:latest
+    platform: linux/amd64
+    init: true
+    user: "1000:1000"
+    cpus: 1
+    mem_limit: 256m
+    pids_limit: 64
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,size=16m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks: [default]
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      - /home/innokenty/.config/hackmeridian/didit.env:/run/secrets/didit.env:ro
+      - didit-state:/runtime
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "2"}
+    command: ["node", "scripts/didit.mjs", "check"]
+volumes:
+  didit-state:

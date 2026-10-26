@@ -1,0 +1,34 @@
+name: hackmeridian-artifacts
+services:
+  studio:
+    image: hackmeridian-artifact-studio:latest
+    build: {context: ., dockerfile: docker/Dockerfile.artifacts}
+    platform: linux/amd64
+    init: true
+    user: "1000:1000"
+    cpus: 2
+    mem_limit: 2g
+    pids_limit: 512
+    shm_size: 256m
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,size=512m", "/home/node:rw,nosuid,uid=1000,gid=1000,size=32m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true", "seccomp:./docker/browser-seccomp.json"]
+    environment:
+      ALLOW_UI_TESTNET: "yes"
+      RECORD_DEMO: "yes"
+      RUN_ID: "submission20261026"
+    volumes:
+      - ./scripts:/app/scripts:ro
+      - .:/source:ro
+      - ./submission/2026-10-26:/submission
+      - ./submission/2026-10-26/recording:/evidence
+    networks: [demo]
+    command: ["node", "scripts/ui-live-testnet.mjs"]
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
+networks:
+  demo:
+    external: true
+    name: hackmeridian-contracts_default
